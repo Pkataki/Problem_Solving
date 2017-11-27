@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+using namespace std;
+int l[20];
+int r[20];
+int spaces;
+int n;
+bool solve(int i, int mask, int spaces_remaning)
+{
+		cout << l[i] << " " << r[i] << endl;
+	if(!spaces_remaning)
+	{
+		if(r[i] == l[1])
+			return 1;
+		else 
+			return 0;
+	}
+	if(i == n)
+		return 0;
+	int ans = 0;
+	int look = 0;
+	for(int j = 0 ; j < n; j++)
+	{
+		if(mask & (1 << j))
+			continue;
+		if(i == 2)
+		{
+			if(l[j] == r[0])
+			ans  |= solve(i+1, mask | (1 << j), spaces_remaning - 1);
+				
+		}
+		if(r[j] == l[j-1])
+			ans  |= solve(i+1, mask | (1 << j), spaces_remaning - 1);
+
+	}
+	return ans;
+}
+int main()
+{
+	while(scanf("%d",&spaces) != EOF)
+	{
+		scanf("%d",&n);
+		for(int i = 0 ; i < n+2 ; i++)
+		{
+			scanf("%d %d",&l[i],&r[i]);
+		}
+		if(solve(2,3,spaces))
+			cout << "YES\n";
+		else
+			cout << "NO\n";
+	}
+}

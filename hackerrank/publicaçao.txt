@@ -1,0 +1,13 @@
+
+const double EPS = 1e-9;
+const double INF = 1e50;
+
+struct pt;
+typedef pair<pt, pt> line;
+typedef vector<pt> polygon;
+
+//funcao de comparacao
+int cmp(double a, double b = 0.0){
+	if(fabs(a-b) < EPS) return 0;
+	return a > b ? 1 : -1;
+}
