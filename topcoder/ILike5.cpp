@@ -2,12 +2,13 @@
 using namespace std;
 class ILike5
 {
-	public : transformTheSequence(vector<int> X)
+	public : int transformTheSequence(vector<int> X)
 	{
 		int ans = 0;
-		for(int i = 0; i < X; i++)
+		for(int i = 0; i < X.size(); i++)
 		{
-			if(X % 10 != 5)
+            int aux = X[i] % 10;
+			if(!(aux & 1))
 				ans++;
 		}
 		return ans;
