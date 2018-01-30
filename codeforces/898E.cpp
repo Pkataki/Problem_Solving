@@ -53,8 +53,7 @@ int main()
 			if(a[i].second == 0)
 				ans += 2;
 			else if(((int)sqrt(a[i].second) * (int)sqrt(a[i].second)) == a[i].second)
-				ans += 1;
-			
+				ans += 1;	
 		}
 	}
 	cout << ans << '\n';

@@ -50,17 +50,13 @@ void SPFA(int node)
         int u = q.front();
         vis[u] = 0 ;
         q.pop_front();
-//		cout << u << " node **\n";
 
         for ( int k = first[u]; k != - 1 ; k = e[k].next)
         {
             int v = e[k].v;
-//			cout << "--> " << v << endl;
-  //          cout << "cap: " << e[k].cap << " dist node: " << dist[u] << " cost: " << e[k].cost << " dist v: " << dist[v] << endl;
 			if (e[k].cap > 0 && (dist[u] + e[k].cost) < dist[v])
             {
-	//			cout << "entrei\n";
-                par[v] = u;
+            	par[v] = u;
                 dist[v] = dist[u] + e[k].cost;
                 rec[v] = k;
 				if (!vis[v])
