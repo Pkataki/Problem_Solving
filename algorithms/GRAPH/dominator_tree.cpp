@@ -55,51 +55,22 @@ using DominatorTree::idom;
 
 VI pred[MAXN], succ[MAXN], dom[MAXN];
 
-int a[MAXN], b[MAXN], in[MAXN], out[MAXN];
-
-int n, m, sz;
-
-void dfs(int u)
-{
-  in[u] = sz++;
-  for (auto &v: dom[u])
-  {
-		dfs(v);
-  
-  }
-  out[u] = sz;
-}
+int a[MAXN], b[MAXN]
 
 int main() {
-  while (scanf("%d%d", &n, &m) == 2) {
-    for (int i = 0; i < n + m; ++ i) {
+  while (scanf("%d%d", &n, &m) == 2)
+  {
+    for (int i = 0; i < n + m; ++ i) 
+    {
       pred[i].clear(); succ[i].clear();
     }
     for (int i = 0; i < m; ++ i) {
       int u, v; scanf("%d%d", &u, &v);
-      a[i] = -- u; b[i] = -- v;
+      a[i] = --u; b[i] = --v;
       succ[u].push_back(v);
       pred[v].push_back(u);
     }
     DominatorTree::build(n, 0, succ, pred, dom);
-    sz = 0; dfs(0);
-    VI ans;
-    for (int i = 0; i < m; ++ i) {
-      
-      int u = dfn[a[i]], v = dfn[b[i]];
-     
-      if (u == -1 || v == -1) 
-      	continue;
-     // cout << i <<" --> " << in[u] << ' ' << in[v] << ' ' << out[u] << ' ' << out[v] << endl;
-      if ((in[v] > in[u] || out[v] < out[u]) ) 
-      	ans.push_back(i + 1);
-    }
-    printf("%d\n", (int)ans.size());
-    
-    for (auto &x: ans) 
-    	printf("%d ", x);
-    
-    puts("");
   }
   return 0;
 }

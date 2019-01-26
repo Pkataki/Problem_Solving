@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 //Para um conjunto de pontos, encontra qual o centro e o raio que engloba todos eles
+// hill climbing
 int n;
 double x[1005], y[1005], X, Y, d, e;
 double dist(double a, double b) {

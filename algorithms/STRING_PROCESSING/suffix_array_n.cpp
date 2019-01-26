@@ -101,7 +101,7 @@ void SA_IS( char *s, int *SA, int n, int K, int cs) {
   getBuckets(s, bkt, n, K, cs, true); // find ends of buckets
   for(i=1, j=0; i<n; i++)
     if(isLMS(i)) s1[j++]=i; // get p1
-  for(i=0; i<n1; i++) SA1[i]=s1[SA1[i]]; // get index in s
+  for(i=0; i<n1; i++) SA1[i] = s1[SA1[i]]; // get index in s
   for(i=n1; i<n; i++) SA[i]=-1; // init SA[n1..n-1]
   for(i=n1-1; i>=0; i--) {
       j=SA[i]; SA[i]=-1;
@@ -129,70 +129,13 @@ int idx[MAXN];
 char s1[100005];
 int main()
 {
-    int last = 0;
-    int id =0;
-    int k = 0;
-    while(scanf("%s",s1) != EOF)
-    {
-        string s2 = s1;
-        T += (s2+char(k+'A'));
-        k++;
-        for(int i = 0; i < s2.size() ; i++)
-            idx[last++] = id;
-        id++;
-        idx[last++] = id++;
-    }
-    idx[last] = id;
+
     T[N++] = '.';
     N = T.size();
     
     SA_IS( (char *)T.data(), SA, N, 150, 83 );
 
     compute_lcp(N);
-    
-    int lo = 0;
-    int hi = 100000;
-    int ans = 0;
-
-  //  for(int i = 0; i < T.size(); i++) cout << T.substr(SA[i]) << " " << lcp[i] << endl; 
-    while(lo <= hi)
-    {
-        int mid = (lo + hi) >> 1;
-      
-        bool ok  = 0;
-        for(int i = 0 ; i < T.size(); i++)
-        {
-            if(lcp[i] > 0 && lcp[i] >= mid)
-            {
-                int j = i+1;
-
-
-                int mask = (1 << idx[SA[i-1]]) | (1 << idx[SA[i]]);
-
-                while(lcp[j] > 0 && lcp[j] >= mid && j < T.size())
-                {
-
-                    mask |= (1 << idx[SA[j]]);
-                    j++;
-
-                }
-                i = j-1;
-                if(__builtin_popcount(mask) >= k)
-                {
-                    ok = 1;
-                    break;
-                }
-            }
-        }
-        if(ok)
-        {
-            ans = max(ans,mid);
-            lo = mid+1;
-        }
-        else
-            hi = mid-1;
-
-    }
-    cout << ans << '\n';
+   
     return 0;
 }

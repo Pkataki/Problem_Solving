@@ -1,12 +1,12 @@
 #include <bits/stdc++.h>
 using namespace std;
-//StoerâWagner
+
 typedef vector<int> VI;
 typedef vector<VI> VVI;
  
 const int INF = INT_MAX;
  
-pair<int, VI> GetMinCut(VVI &weights) 
+pair<int, VI> GetMinCut(VVI &weights) // bidirectional edges
 {
     int N = weights.size();
     VI used(N), cut, best_cut;
@@ -49,26 +49,3 @@ pair<int, VI> GetMinCut(VVI &weights)
     }
     return make_pair(best_weight, best_cut);
 }
-int main()
-{
-    ios_base::sync_with_stdio(0);
-    int test;
-    cin >> test;
-    while(test--)
-    {
-        int n,m;
-        cin >> n >> m;
-        vector<vector<int> > weights(n, vector<int> (n));
-        for(int i = 0; i < m; i++)
-        {
-            int a,b,c;
-            cin >> a >> b >> c;
-            a--;
-            b--;
-            weights[a][b] = c;
-            weights[b][a] = c;
-        }
-        pair<int, VI> ans = GetMinCut(weights);
-        cout << ans.first << '\n'; 
-    }
-} 

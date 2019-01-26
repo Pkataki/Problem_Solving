@@ -1,42 +1,103 @@
-#define MAXN 111
+#include<bits/stdc++.h>
+using namespace std;
 
-int N, M;   // N - # of vertexes on X,  M - # of vertexes on Y
-vector< int > gr[MAXN];  // gr[u] -- edges from u in X to v in Y
-bool seen[MAXN];		
-int m[MAXN], m1[MAXN];   // with whom it's matched
+#define MAX_V1 1000000
+#define MAX_V2 1000000
+#define MAX_E 8000000
 
-int dfs( int u ){
-	if( u < 0 ) return 1;
-	if( seen[u] ) return 0;
-	seen[u] = true;
-	for( size_t i = 0, sz = gr[u].size(); i < sz; i++ ){
-		if( dfs( m1[ gr[u][i] ] ) ){
-			m[u] = gr[u][i];
-			m1[ gr[u][i] ] = u;
-			return 1;
+int V1 = 0,V2 = 0,l[MAX_V2],r[MAX_V1];
+int E,to[MAX_E],nex[MAX_E],last[MAX_V1];
+
+void hk_init(){
+    memset(last,-1,sizeof last);
+}
+
+void hk_add_edge(int u, int v){
+    to[E] = v; nex[E] = last[u]; last[u] = E++;
+}
+
+bool visited[MAX_V1];
+
+bool hk_dfs(int u){
+    if(visited[u]) return false;
+    visited[u] = true;
+    
+    for(int e = last[u],v;e != -1;e = nex[e]){
+        v = to[e];
+        
+        if(l[v] == -1 || hk_dfs(l[v])){
+            r[u] = v;
+            l[v] = u;
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+int hk_match(){
+    memset(l,-1,sizeof l);
+    memset(r,-1,sizeof r);
+    bool change = true;
+    
+    while(change){
+        change = false;
+        memset(visited,false,sizeof visited);
+        
+        for(int i = 0;i < V1;++i)
+            if(r[i] == -1)
+                change |= hk_dfs(i);
+    }
+    
+    int ret = 0;
+    
+    for(int i = 0;i < V1;++i)
+        if(r[i] != -1) ++ret;
+    
+    return ret;
+}
+
+int n,m;	
+bool valid(int x, int y)
+{
+	return (x > 0  && x <= n && y > 0 && y <= m);
+}
+int id[1005][1005];
+int dx[] = {-1,-1,1,1,2,2,-2,-2};
+int dy[] = {-2,2,-2,2,-1,1,-1,1};
+int main()
+{
+ 	scanf("%d %d",&n,&m);
+ 	hk_init();
+ 	for(int i = 1;i <= n;++i)
+ 	{
+        for(int j = 1;j <= m;++j)
+        {
+            if((i + j) % 2 == 0) 
+            	id[i][j] = V1++;
+            else 
+            	id[i][j] = V2++;
+        }
+    }
+	for(int i = 1 ; i <= n ; i++)
+	{
+		for(int j = 1; j <= m ; j++)
+		{
+			if((i+j) & 1 )
+				continue;
+        	for(int k = 0 ; k < 8 ; k++)
+        	{
+		        int x = i + dx[k];
+		        int y = j + dy[k];
+		        if (valid(x,y) )
+		      	{
+		           	hk_add_edge(id[i][j],id[x][y]);
+		        }
+        	}
 		}
 	}
-	return 0;
-}
-
-int dfsExp( int u ){
-	for( int i = 0; i < N; i++ ) seen[i] = false;
-	return dfs( u );
-}
-
-int bipMatch(){
-	for( int i = 0; i < N; i++ ) m[i] = -1;
-	for( int i = 0; i < M; i++ ) m1[i] = -1;
-	int aug, ans = 0;
-	do{
-		aug = 0;
-		bool first = true;
-		for( int i = 0; i < N; i++ ) if( m[i] < 0 ){
-			if( first ) aug += dfsExp( i );
-			else aug += dfs( i );
-			first = false;
-		}
-		ans += aug;
-	} while( aug );
-	return ans;
+	
+	printf("%d\n",n*m-hk_match());
+  
+  return 0;
 }

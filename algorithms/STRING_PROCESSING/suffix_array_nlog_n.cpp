@@ -1,11 +1,12 @@
-	#include<bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
-int RA[100010];
-char s[100010];
-int tempRA[100010];
-int tempSA[100010];
-int SA[100010];
-int c[100010];
+const int maxn = 100015;
+int RA[maxn];
+char s[maxn];
+int tempRA[maxn];
+int tempSA[maxn];
+int SA[maxn];
+int c[maxn];
 int n;
 int m;
 void countSort(int k)
@@ -47,10 +48,10 @@ void construct_sa()
 	}
 	
 }
-int phi[100010];
-int plcp[100010];
-char str[100010];
-int lcp[100010];
+int phi[maxn];
+int plcp[maxn];
+char str[maxn];
+int lcp[maxn];
 void compute_lcp()
 {
 	phi[SA[0]] = -1;
@@ -114,7 +115,7 @@ pair<int,int> string_match()
 }
 
 
-main()
+int main()
 {
 	int test;
 	cin >> test;
@@ -145,6 +146,6 @@ main()
 		}
 		else
 			printf("No repetitions found!\n");
-	
 	}
+	return 0;
 }

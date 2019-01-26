@@ -35,7 +35,7 @@ matrix power(matrix base, int p)
 	}
 	return ans;
 }
-main()
+int main()
 {	
 	ios_base::sync_with_stdio(0);
 	int n;
@@ -50,4 +50,5 @@ main()
 	matrix ans = power(a,n-2);
 	long long fib1 = ans.mat[0][0] + ans.mat[0][1];
 	cout << fib1 << "\n";
+	return 0;
 }

@@ -28,38 +28,6 @@ void solve(int k, int lo, int hi, int opl , int opr)
     solve(k, mid+1, hi, opt, opr);
 }
     
-template<typename T>
-bool read( T &n ) { 
-    n = 0; 
-    register bool neg = false; 
-    register char c = getchar_unlocked(); 
-    if( c == EOF) { n = -1; return false; } 
-    while (!('0' <= c && c <= '9')) { 
-        if( c == '-' ) neg = true; 
-        c = getchar_unlocked(); 
-    } 
-    while ('0' <= c && c <= '9') { 
-        n = n * 10 + c - '0'; 
-        c = getchar_unlocked(); 
-    } 
-    n = (neg ? (-n) : (n)); 
-    return true; 
-} 
- 
-template<typename T>
-inline void writeInt(T n){ 
-    register int idx = 20; 
-    if( n < 0 ) putchar_unlocked('-'); 
-    n = abs(n); 
-    char out[21]; 
-    out[20] = ' '; 
-    do{ 
-        idx--; 
-        out[idx] = n % 10 + '0'; 
-        n/= 10; 
-    }while(n); 
-    do{ putchar_unlocked(out[idx++]); } while (out[idx] != ' '); 
-} 
 
 int main()
 {

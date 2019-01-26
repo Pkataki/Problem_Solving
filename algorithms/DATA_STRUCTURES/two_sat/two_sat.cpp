@@ -1,104 +1,105 @@
-typedef long long ll;
-const ll MAXN=2004;
+#include <bits/stdc++.h>
 
-vector<vector<int> > graph, rev_graph;
+using namespace std;
 
-int used[2*MAXN], comp[2*MAXN], order[2*MAXN], res[2*MAXN], cnt = 0;
+const int MAXN = 64;
 
-void dfs1(int u)
-{
-  used[u] = true;
-  for (auto i = 0u; i < graph[u].size(); i++)
-  {
-    int v = graph[u][i];
-    if (!used[v]) 
-      dfs1(v);
-  }
-  order[cnt++] = u; 
-}
+inline int negated(int var) { return var ^ 1; }
 
-void dfs2(int u, int color)
-{ 
-  comp[u] = color;
-  for (auto i = 0u; i < rev_graph[u].size(); i++)
-  {
-    int v = rev_graph[u][i];
-    if (comp[v] == -1) 
-      dfs2(v, color);
-  } 
-}
+namespace TwoSAT {
+  array<int, MAXN> low, lbl, belongs_to;
+  array<bool, MAXN> is_stacked;
+  array<vector<int>, MAXN> gr;
+  int dfsnum, components, n;
 
+  stack<int> scc;
 
-bool twosat() { 
-  int n = graph.size();
-  for (int i = 0; i < n; i++) 
-      if (!used[i]) 
-          dfs1(i);
-  
-  for (int i = 0; i < n; i++) 
-    for (auto j = 0u; j < graph[i].size(); j++)
-      rev_graph[graph[i][j]].push_back(i);
-  
-  for (int i = 0, color = 0; i < n; i++)
-  {
-    int u = order[n-i-1];
-    if (comp[u] == -1) 
-      dfs2(u, color++); 
+  void init(int sz) {
+    n = sz;
+    for (int i = 0; i < n; ++i) gr[i].clear();
+    fill(lbl.begin(), lbl.begin() + n, -1);
+    components = 0;
   }
 
-  for (int i = 0; i < n; i++) 
-      if (comp[i] == comp[i^1]) 
-          return false;
-  
-  for (int i = 0; i < n; i+=2) 
-    res[i/2] = (comp[i] > comp[i^1]);
-  
-  return true; 
-}
-void init_twosat(ll vars)
-{
-  ll n=2*vars;
-  graph.clear(); rev_graph.clear();
-  graph.resize(2*n);
-  rev_graph.resize(2*n);
-  memset(order, 0, sizeof order);
-  memset(comp, -1, sizeof comp);
-  memset(used, 0,  sizeof used);
-  cnt=0;
-}
+  void dfs(int u) {
+    lbl[u] = low[u] = dfsnum++;
 
-//if type = 0, we add the edge (~x v y), if type = 1, we add the edge (x v y)
-//if type = 2, we add the edge (~x v ~y), if type = 3, we add the edge (x v ~y)
+    scc.push(u);
+    is_stacked[u] = true;
 
-//NOTE: add_egde add the implications on form x -> y.
-void add(int x, int y)
-{ 
-    graph[x].push_back(y); 
-}
+    for (int v : gr[u]) {
+      if (lbl[v] == -1) dfs(v);
+      if (is_stacked[v]) low[u] = min(low[u], low[v]);
+    }
 
-void add_edge(int x, int y, int type)
-{ 
-  int a=2*x, na=2*x+1, b=2*y, nb=2*y+1;
-  switch (type) 
-  {
-    case 0: 
-      add(a,b); 
-      add(nb, na); 
-      break;
-    
-    case 1: 
-      add(na, b); 
-      add(nb, a); 
-      break;
+    auto pop = [&]() {
+      belongs_to[scc.top()] = components;
+      is_stacked[scc.top()] = false;
+      scc.pop();
+    };
 
-    case 2: 
-      add(a, nb); 
-      add(b, na); 
-      break;
+    if (low[u] == lbl[u]) {
+      while (!scc.empty() && scc.top() != u) {
+        pop();
+      }
+      pop();
+      components++;
+    }
+  }
 
-    case 3: 
-      add(na, nb); 
-      add(b,a); 
-      break; 
-  } 
+  void add_or_clause(int x, int y) {
+    gr[negated(x)].push_back(y);
+    gr[negated(y)].push_back(x);
+  }
+
+  bool is_solvable() {
+    for (int i = 0; i < n; ++i)
+      if (lbl[i] == -1) dfs(i);
+
+    for (int i = 0; i < n; i += 2) {
+      if (belongs_to[i] == belongs_to[i + 1]) return false;
+    }
+
+    return true;
+  }
+
+  // is_true assumes that is_solvable was already called and returned true
+  bool is_true(int var) {
+    // tarjan already produces SCC in reverse topological order of the SCC graph
+    // to know if a variable is true we just need to check if the SCC it is in
+    // appears earlier than the SCC where its negation is
+    return belongs_to[var] < belongs_to[negated(var)];
+  }
+};
+
+int main(int argc, char* argv[]) {
+
+  ios::sync_with_stdio(false);
+  cin.tie(NULL);
+
+  int n, m;
+  while (cin >> n >> m && (n || m)) {
+    int couple1, couple2, var1, var2;
+    char partner1, partner2;
+
+    TwoSAT::init(2 * n);
+
+    while (m--) {
+      cin >> couple1 >> partner1 >> couple2 >> partner2;
+      var1 = (couple1 << 1) ^ (partner1 == 'h' ? 1 : 0);
+      var2 = (couple2 << 1) ^ (partner2 == 'h' ? 1 : 0);
+      TwoSAT::add_or_clause(var1, var2);
+    }
+
+    // the bride must seat on the same side as the bride :)
+    TwoSAT::add_or_clause(0, 0);
+
+    if (TwoSAT::is_solvable()) {
+      for (int i = 1; i < n; ++i) {
+        cout << i << (TwoSAT::is_true(2*i) ? "w" : "h") << " \n"[i+1==n];
+      }
+    } else cout << "bad luck\n";
+  }
+
+  return 0;
 }

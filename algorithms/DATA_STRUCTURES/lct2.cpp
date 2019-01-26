@@ -1,12 +1,4 @@
-#include<bits/stdc++.h>
-using namespace std;
-template <class _T> inline void read(_T &_x) {
-	int _t; bool _flag=false;
-	while((_t=getchar())!='-'&&(_t<'0'||_t>'9')) ;
-	if(_t=='-') _flag=true,_t=getchar(); _x=_t-'0';
-	while((_t=getchar())>='0'&&_t<='9') _x=_x*10+_t-'0';
-	if(_flag) _x=-_x;
-}
+
 typedef long long LL;
 const int maxn = 400010;
 int n, m, q, u0[maxn], v0[maxn];
@@ -78,47 +70,4 @@ inline void update(int c, int val)
 	makeroot(c);
 	mn[c] = val;
 	pushup(c);
-}
-int main()
-{
-	ios::sync_with_stdio(0);
-	int n,m;
-	while(scanf("%d",&n) != EOF)
-	{
-		for(int i = 1; i <= n; i++)
-		{
-			int a,b;
-			scanf("%d",&mn[i]);
-			sum[i] = mn[i];
-		}
-		scanf("%d",&m);
-		while(m--)
-		{
-			int x,y;
-			char op[55];
-			scanf("%s",op);
-			scanf("%d %d",&x,&y);
-			if(op[0] == 'b')
-			{
-				if(sametree(x, y))
-					puts("no");
-				else
-				{
-					link(x,y);
-					puts("yes");
-				}
-			}
-			else if(op[0] == 'p')
-			{
-				update(x, y);
-			}
-			else
-			{
-				int ans = query(x, y);
-				if (ans == -1) puts("impossible");
-				else printf("%d\n", ans);
-			}
-		}
-	}
-	return 0;
 }

@@ -1,171 +1,169 @@
-struct Node;
-typedef pair <Node*, Node*> Pair;
+#include<bits/stdc++.h>
+using namespace std;
+struct treap
+{
+    struct node
+    {
+        int val,prior,sz,rank,rev;
+        node *l, *r;
+        node(int val) : val(val), prior(rand()), sz(1), rank(1), l(NULL), r(NULL),rev(0) {}
+    };
  
-Node *null, *root;
+    typedef node * pnode;
  
-struct Node {
-    int sz;
-    int mn;
-    int val;
-    int lzy1;
-    int lzy2;
-    Node *lft;
-    Node *rht;
-    Pair split(int);
+    pnode root = NULL;
  
-    void add(int v) {
-        if (this == null) {
+    int sz(pnode t)
+    {
+        return t ? t->sz : 0;
+    }
+ 
+    void upd(pnode &t)
+    {
+        if(t)
+        {
+            t->sz = 1 + sz(t->l) + sz(t->r);
+            t->rank = 1 + sz(t->l);
+        }
+    }
+ 
+    void split(pnode t, pnode &l, pnode &r, int key)
+    {
+        if(!t)
+            l = r = NULL;
+        else if(t->val <= key)
+        {
+            split(t->r,t->r,r,key);
+            l = t;
+        }
+        else
+        {
+            split(t->l,l,t->l,key);
+            r = t;
+        }
+        upd(t);
+    }
+ 
+    void merge(pnode &t, pnode l , pnode r)
+    {
+        if(!l || !r)
+        {
+            t = l ? l : r;
+        }
+        else if(l->prior > r->prior)
+        {
+            merge(l->r,l->r,r);
+            t = l;
+        }
+        else
+        {   
+            merge(r->l,l,r->l);
+            t = r;
+        }
+        upd(t);
+    }
+
+    void push (pnode it) 
+    {
+	    if (it && it->rev) 
+	    {
+	        it->rev = false;
+	        swap(it->l, it->r);
+	        if (it->l)  it->l->rev ^= true;
+	        if (it->r)  it->r->rev ^= true;
+	    }
+	}
+
+	// split na posicao
+	void split_pos (pnode t, pnode &l, pnode &r, int key, int add = 0) 
+	{
+	    if (!t)
+	        return void( l = r = 0 );
+	    push (t);
+	    int cur_key = add + sz(t->l);
+	    if (key <= cur_key)
+	        split_pos (t->l, l, t->l, key, add),  r = t;
+	    else
+	        split_pos (t->r, t->r, r, key, add + 1 + sz(t->l)),  l = t;
+	    upd(t);
+	}
+
+	void reverse (pnode t, int l, int r) 
+	{
+	    pnode t1, t2, t3;
+	    split_pos(t, t1, t2, l);
+	    split_pos(t2, t2, t3, r-l+1);
+	    t2->rev ^= true;
+	    merge(t, t1, t2);
+	    merge(t, t, t3);
+	}
+
+ 
+    void insert(int val)
+    {
+        pnode l,r;
+        split(root,l,r,val);
+        merge(l,l,new node(val));
+        merge(root,l,r);
+    }
+ 
+    //remove somente um no igual a val
+    void del(pnode &t, int val)
+    {
+        if(!t)
             return;
-        }
-        mn += v;
-        val += v;
-        lzy1 += v;
+        if(t->val == val)
+            merge(t,t->l,t->r);
+        else
+            del(val > t->val ? t->r : t->l , val);
+        upd(t);
     }
  
-    Node *pushup() {
-        sz = lft->sz + 1 + rht->sz;
-        mn = min(min(lft->mn, rht->mn), val);
-        return this;
+    // remove todos os nos igual a val
+    void del(int val)
+    {
+        pnode l,r,m;
+        split(root,l,m,val-1);
+        split(m,m,r,val);
+        merge(root,l,r);
     }
  
-    Node *pushdown() {
-        if (this == null) {
-            return this;
-        }
-        if (lzy1 != 0) {
-            lft->add(lzy1);
-            rht->add(lzy1);
-            lzy1 = 0;
-        }
-        if (lzy2 != 0) {
-            swap(lft, rht);
-            if (lft != null) {
-                lft->lzy2 ^= 1;
-            }
-            if (rht != null) {
-                rht->lzy2 ^= 1;
-            }
-            lzy2 = 0;
-        }
-        return this;
+    //conta quantos valores menores que val tem na treap
+    int count(int val)
+    {
+        pnode l,r;
+        split(root,l,r,val-1);
+        int ans = 0;
+        if(l)
+            ans = sz(l);
+        merge(root,l,r);
+        return ans;
+    }
+ 
+    void dfs(pnode root, int d)
+    {
+        if(root == NULL)
+            return;
+        dfs(root->r,d+1);
+        printf("%*d\n",5*d,root->val);   
+        dfs(root->l,d+1);
+    }
+     
+    int kth(pnode t, int k)
+    {
+        if(k == t->rank)
+            return t->val;
+        else if(k < t->rank)
+            return kth(t->l, k);
+        else
+            return kth(t->r, k - t->rank);
     }
 };
- 
-bool random(int a, int b) {
-    return double(rand()) / RAND_MAX < (double) a / (a + b);
-}
- 
-Node *merge(Node *p, Node *q) {
-    if (p == null) {
-        return q;
-    }
-    if (q == null) {
-        return p;
-    }
-    if (random(p->sz, q->sz)) {
-        p->pushdown();
-        p->rht = merge(p->rht, q);
-        return p->pushup();
-    }
-    q->pushdown();
-    q->lft = merge(p, q->lft);
-    return q->pushup();
-}
- 
-Pair Node::split(int need) {
-    if (this == null) {
-        return make_pair(null, null);
-    }
-    pushdown();
-    if (lft->sz >= need) {
-        Pair ret = lft->split(need);
-        lft = null;
-        pushup();
-        return make_pair(ret.first, merge(ret.second, this));
-    }
-    Pair ret = rht->split(need - (lft->sz + 1));
-    rht = null;
-    pushup();
-    return make_pair(merge(this, ret.first), ret.second);
-}
- 
-int cnt;
-Node data[N];
- 
-Node *newnode(int c) {
-    Node *x;
-    x = &data[cnt++];
-    x->lft = x->rht = null;
-    x->sz = 1;
-    x->lzy1 = x->lzy2 = 0;
-    x->val = x->mn = c;
-    return x;
-}
- 
-void init() {
-    cnt = 1;
-    null = &data[0];
-    null->sz = 0;
-    null->val = null->mn = INF;
-    null->lzy1 = null->lzy2 = 0;
-    null->lft = null->rht = null;
-}
- 
-void print(Node *rt) {
-    if (rt == null) {
-        return;
-    }
-    print(rt->lft);
-    printf("%d ", rt->val);
-    print(rt->rht);
-}
- 
-void solve() {
-    init();
-    root = null;
-    scanf("%d", &n);
-    for (int i = 0; i < n; i++) {
-        scanf("%d", &a);
-        root = merge(root, newnode(a));
-    }
-    scanf("%d", &m);
-    for (int it = 0; it < m; it++) {
-        scanf("%s", ord);
-        if (strcmp(ord, "ADD") == 0) {
-            scanf("%d %d %d", &from, &to, &by);
-            Pair ret1 = root->split(from - 1);
-            Pair ret2 = ret1.second->split(to - from + 1);
-            ret2.first->add(by);
-            root = merge(ret1.first, merge(ret2.first, ret2.second));
-        } else if (strcmp(ord, "MIN") == 0) {
-            scanf("%d %d", &from, &to);
-            Pair ret1 = root->split(from - 1);
-            Pair ret2 = ret1.second->split(to - from + 1);
-            printf("%d\n", ret2.first->mn);
-            root = merge(ret1.first, merge(ret2.first, ret2.second));
-        } else if (strcmp(ord, "DELETE") == 0) {
-            scanf("%d", &from);
-            Pair ret1 = root->split(from - 1);
-            Pair ret2 = ret1.second->split(1);
-            root = merge(ret1.first, ret2.second);
-        } else if (strcmp(ord, "INSERT") == 0) {
-            scanf("%d %d", &from, &by);
-            Pair ret1 = root->split(from);
-            root = merge(merge(ret1.first, newnode(by)), ret1.second);
-        } else if (strcmp(ord, "ROTATE") == 0) {
-            scanf("%d %d %d", &from, &to, &by);
-            int len = (to - from + 1);
-            by = (by % len + len) % len;
-            Pair ret1 = root->split(from - 1);
-            Pair ret2 = ret1.second->split(to - from + 1);
-            Pair ret3 = ret2.first->split(to - from + 1 - by);
-            root = merge(ret1.first, merge(merge(ret3.second, ret3.first), ret2.second));
-        } else if (strcmp(ord, "REVERSE") == 0) {
-            scanf("%d %d", &from, &to);
-            Pair ret1 = root->split(from - 1);
-            Pair ret2 = ret1.second->split(to - from + 1);
-            ret2.first->lzy2 = 1;
-            root = merge(ret1.first, merge(ret2.first, ret2.second));
-        }
-    }
+int main()
+{
+    
+    srand(time(NULL));
+    
+    treap t;
+    return 0;
 }

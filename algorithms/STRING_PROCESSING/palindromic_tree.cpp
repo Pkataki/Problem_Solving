@@ -1,143 +1,131 @@
-#include "bits/stdc++.h"
+#include<bits/stdc++.h>
 using namespace std;
- 
-#define MAXN  1000
- 
-struct Node
+
+const int N = 200005;
+
+
+int q[N];
+
+int n;
+int sz;
+int last;
+int s[N];
+//int pos[N];
+//int occ[N];
+int len[N];
+int link[N];
+int deg[N];
+int to[N][30];
+
+void init() 
 {
-    // store start and end indexes of current
-    // Node inclusively
-    int start, end;
- 
-    // stores length of substring
-    int length;
- 
-    // stores insertion Node for all characters a-z
-    int insertEdg[26];
- 
-    // stores the Maximum Palindromic Suffix Node for
-    // the current Node
-    int suffixEdg;
-};
- 
-// two special dummy Nodes as explained above
-Node root1, root2;
- 
-// stores Node information for constant time access
-Node tree[MAXN];
- 
-// Keeps track the current Node while insertion
-int currNode;
-string s;
-int ptr;
- 
-void insert(int idx)
+    n = 0;
+    last = 0;
+    sz = 2;
+    mask[0] = 0;
+    mask[1] = 0;
+    s[n++] = -1;
+    len[0] = 0;
+    len[1] = -1;
+    link[0] = 1;
+    link[1] = 0;
+    //memset(mask,0,sizeof(mask));
+    memset(to[0], 0, sizeof to[0]);
+    memset(to[1], 0, sizeof to[1]);
+}
+
+int get_link(int v) {
+    while (s[n - len[v] - 2] != s[n - 1]) {
+        v = link[v];
+    }
+    return v;
+}
+
+void add_letter(int c, int at) {
+    s[n++] = c;
+    last = get_link(last);
+    
+    if (to[last][c] == 0) {
+       
+        len[sz] = len[last] + 2;
+        pos[sz] = (n-1) - len[sz] + 1;
+        link[sz] = to[get_link(link[last])][c];
+        memset(to[sz], 0, sizeof to[sz]);
+        to[last][c] = sz++;
+    }
+    last = to[last][c];
+    mask[last] |= (1 << at);
+  
+}
+
+int bfs(int val)
 {
-//STEP 1//
- 
-    /* search for Node X such that s[idx] X S[idx]
-       is maximum palindrome ending at position idx
-       iterate down the suffix link of currNode to
-       find X */
-    int tmp = currNode;
-    while (true)
+    //memset(deg,0,sizeof(deg));
+    int ans = 0;
+    int p = 0;
+    for(int i = 1; i < sz; i++)
     {
-        int curLength = tree[tmp].length;
-        if (idx - curLength >= 1 and s[idx] == s[idx-curLength-1])
+        deg[link[i]]++;
+    }
+    for(int i = 1; i < sz; i++)
+    {
+        if(deg[i] == 0)
+            q[++p] = i;
+    }
+   
+    while(p)
+    {
+        int at = q[p];
+        p--;
+
+        if(at <= 0)
             break;
-        tmp = tree[tmp].suffixEdg;
+        mask[link[at]] |= mask[at];
+        if(mask[at] == val)
+            ans = max(ans,len[at]);
+        mask[at] = 0;
+        if((--deg[link[at]]) == 0)
+            q[++p] = link[at];
     }
- 
-    /* Now we have found X ....
-     * X = string at Node tmp
-     * Check : if s[idx] X s[idx] already exists or not*/
-    if(tree[tmp].insertEdg[s[idx]-'a'] != 0)
+    return ans;
+}
+
+
+
+bool readString( int id )
+{
+    char c = getchar_unlocked();
+    while(c == '\n' || c == ' '){
+        c = getchar_unlocked();
+    
+    }
+    //cout <<  "**" << int(c)  << endl;
+    while( c != EOF && c >= 'a' && c <= 'z'  )
     {
-        // s[idx] X s[idx] already exists in the tree
-        currNode = tree[tmp].insertEdg[s[idx]-'a'];
-        return;
+        //cout << c ;
+        add_letter(c - 'a',id);
+        c = getchar_unlocked();
     }
- 
-    // creating new Node
-    ptr++;
- 
-    // making new Node as child of X with
-    // weight as s[idx]
-    tree[tmp].insertEdg[s[idx]-'a'] = ptr;
- 
-    // calculating length of new Node
-    tree[ptr].length = tree[tmp].length + 2;
- 
-    // updating end point for new Node
-    tree[ptr].end = idx;
- 
-    // updating the start for new Node
-    tree[ptr].start = idx - tree[ptr].length + 1;
- 
- 
-//STEP 2//
- 
-    /* Setting the suffix edge for the newly created
-       Node tree[ptr]. Finding some String Y such that
-       s[idx] + Y + s[idx] is longest possible
-       palindromic suffix for newly created Node.*/
- 
-    tmp = tree[tmp].suffixEdg;
- 
-    // making new Node as current Node
-    currNode = ptr;
-    if (tree[currNode].length == 1)
-    {
-        // if new palindrome's length is 1
-        // making its suffix link to be null string
-        tree[currNode].suffixEdg = 2;
-        return;
-    }
-    while (true)
-    {
-        int curLength = tree[tmp].length;
-        if (idx-curLength >= 1 and s[idx] == s[idx-curLength-1])
-            break;
-        tmp = tree[tmp].suffixEdg;
-    }
- 
-    // Now we have found string Y
-    // linking current Nodes suffix link with s[idx]+Y+s[idx]
-    tree[currNode].suffixEdg = tree[tmp].insertEdg[s[idx]-'a'];
+    //exit(0);
+    return c == EOF;
 }
  
-// driver program
+
 int main()
 {
-    // initializing the tree
-    root1.length = -1;
-    root1.suffixEdg = 1;
-    root2.length = 0;
-    root2.suffixEdg = 1;
- 
-    tree[1] = root1;
-    tree[2] = root2;
-    ptr = 2;
-    currNode = 1;
- 
-    // given string
-    s = "abcbab";
-    int l = s.length();
- 
-    for (int i=0; i<l; i++)
-        insert(i);
- 
-    // printing all of its distinct palindromic
-    // substring
-    cout << "All distinct palindromic substring for "
-         << s << " : \n";
-    for (int i=3; i<=ptr; i++)
+    int n;
+    while(scanf("%d",&n) != EOF)
     {
-        cout << i-2 << ") ";
-        for (int j=tree[i].start; j<=tree[i].end; j++)
-            cout << s[j];
-        cout << endl;
+        init();
+        for(int i = 0; i < n; i++)
+        {
+            readString(i);
+            //cout << endl;
+            if(i != n-1)
+                add_letter('{' - 'a',i);
+        }
+        printf("%d\n",bfs((1 << n) - 1));
     }
- 
+
     return 0;
 }

@@ -5,30 +5,6 @@ int dp[MAXN][MAXN];
 int opt[MAXN][MAXN];
 int sum[MAXN][MAXN];
 
-inline int get()
-{
-	char c = getchar();
-	int ans = 0;
-	for( ; c < '0' || c > '9'; c = getchar());
-	for( ; c >= '0' && c <= '9'; c = getchar())
-		ans = ans * 10 + c - '0';
-	return ans;
-}
-
-inline void writeInt(int n){ 
-    register int idx = 20; 
-    if( n < 0 ) putchar('-'); 
-    n = abs(n); 
-    char out[21]; 
-    out[20] = ' '; 
-    do{ 
-        idx--; 
-        out[idx] = n % 10 + '0'; 
-        n/= 10; 
-    }while(n); 
-    do{ putchar(out[idx++]); } while (out[idx] != ' '); 
-} 
-
 int cost(int i, int j)
 {
 	return sum[j][j] - sum[i][j] - sum[j][i] + sum[i][i]; 

@@ -5,6 +5,15 @@ vector<int>p(110);
 int res[105][105];
 vector<vector<int> >graph(110);
 int n;
+
+void add_edge(int de, int para, int peso)
+{
+	graph[de].push_back(para);
+	graph[para].push_back(de);
+	res[de][para] += peso;
+	res[para][de] += peso;
+}
+
 void augment(int v, int min_edge)
 {
 	if(v == s)
@@ -55,25 +64,3 @@ int edmond_karp()
 	}
 	return mf;
 }
-int main()
-{
-	int k = 0;
-	while(scanf("%d",&n) && n)
-	{
-		memset(res,0,sizeof(res));
-		int c;
-		scanf("%d %d %d",&s,&t,&c);
-		int de,para,peso;
-		for(int w = 1; w <= c; w++)
-		{
-			scanf("%d %d %d",&de,&para,&peso);
-			graph[de].push_back(para);
-			graph[para].push_back(de);
-			res[de][para] += peso;
-			res[para][de] += peso;
-			//printf("w:%d de:%d para:%d peso:%d\n",w,de,para,peso);
-		}
-		printf("Network %d\nThe bandwidth is %d.\n\n",++k,edmond_karp());
-	}
-	return 0;
-}	

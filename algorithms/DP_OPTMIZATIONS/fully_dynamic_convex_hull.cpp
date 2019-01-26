@@ -5,8 +5,6 @@ using namespace std;
 
 const int MAXN = 100010;
 
-const ll is_query = -(1LL<<62);
-
 struct Line {
     ll m, b;
 	int id;
@@ -45,74 +43,4 @@ struct HullDynamic : public multiset<Line> { // will maintain upper hull for max
 //        return l.m * x + l.b;
 		return l.id;
     }
-} tree[MAXN*4];
-pair<long long, long long >v[MAXN];
-bool cmp(int x, int y, long long t)
-{
-	return ((v[x].first * t + v[x].second) >= (v[y].first * t + v[y].second)) ;
-}
-
-
-void build(int node, int l, int r) {
-	tree[node].init();
-	if(l == r) 
-	{
-		tree[node].add_line(v[l].first, v[l].second, l);
-		return;
-	}
-
-	int mid = (l+r) >> 1;
-
-	build(2*node, l, mid);
-	build(2*node+1, mid+1, r);
-
-	for(int i = l; i <= r; i++) 
-	{
-		tree[node].add_line(v[i].first, v[i].second, i);
-	}
-}
-
-int query(int node, int l, int r, int i, int j, int x) {
-	if(i == l && j == r) 
-	{
-		return tree[node].query(x);
-	}
-
-	int mid = (l+r) >> 1;
-
-	if(j <= mid) 
-		return query(2*node, l, mid, i, j, x);
-	else if(i > mid) 
-		return query(2*node+1, mid+1, r, i, j, x);
-	
-	int p = query(2*node, l, mid, i, mid, x);
-	int q = query(2*node+1, mid+1, r, mid+1, j, x);
-	
-	if(cmp(p,q,x)) 
-		return p;
-	return q;
-}
-
-int main () 
-{
-
-	int n, q;
-	long long a,b;
-	scanf("%d %d",&n,&q);
-	for(int i = 1; i<= n ; i++)
-	{
-		scanf("%lld %lld",&b,&a);
-		v[i] = {a, b};
-	}
-
-	build(1, 1, n);
-
-	while(q--) 
-	{
-		int l,r;
-		long long t;
-		scanf("%d %d %lld",&l,&r,&t);
-		printf("%d\n", query(1, 1, n, l, r, t));
-	}
-	return 0;
-}
+};
